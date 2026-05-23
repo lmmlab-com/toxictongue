@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>💀 毒舌回覆生成器</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+HK:wght@400;700;900&family=Orbitron:wght@400;700;900&display=swap');
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #0a0a1a;
+      --surface: #12122a;
+      --primary: #ff3b7f;
+      --secondary: #7b2ff7;
+      --accent: #00f5d4;
+      --text: #e0e0f0;
+      --text-dim: #8888aa;
+      --glow: 0 0 20px rgba(255, 59, 127, 0.3);
+      --border: rgba(255, 59, 127, 0.2);
+    }
+
+    body {
+      font-family: 'Noto Sans HK', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background-image:
+        radial-gradient(ellipse at 20% 50%, rgba(123, 47, 247, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 50%, rgba(255, 59, 127, 0.08) 0%, transparent 50%);
+    }
+
+    /* Animated background grid */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image:
+        linear-gradient(rgba(255, 59, 127, 0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 59, 127, 0.03) 1px, transparent 1px);
+      background-size: 50px 50px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 680px;
+      padding: 20px;
+      margin: 0 auto;
+    }
+
+    header {
+      text-align: center;
+      padding: 40px 0 30px;
+    }
+
+    .logo {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 14px;
+      color: var(--accent);
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      opacity: 0.7;
+    }
+
+    h1 {
+      font-size: 2.4rem;
+      font-weight: 900;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.2;
+    }
+
+    .subtitle {
+      color: var(--text-dim);
+      font-size: 0.95rem;
+      margin-top: 8px;
+    }
+
+    .subtitle span {
+      color: var(--primary);
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px 24px;
+      margin-bottom: 20px;
+      backdrop-filter: blur(10px);
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .card:focus-within {
+      border-color: var(--primary);
+      box-shadow: var(--glow);
+    }
+
+    .input-group {
+      display: flex;
+      gap: 12px;
+      align-items: stretch;
+    }
+
+    .input-group input {
+      flex: 1;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-size: 1rem;
+      font-family: 'Noto Sans HK', sans-serif;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.3s;
+    }
+
+    .input-group input::placeholder {
+      color: var(--text-dim);
+      opacity: 0.6;
+    }
+
+    .input-group input:focus {
+      border-color: var(--accent);
+    }
+
+    .btn {
+      padding: 14px 28px;
+      border: none;
+      border-radius: 10px;
+      font-family: 'Noto Sans HK', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      color: white;
+      box-shadow: 0 4px 15px rgba(255, 59, 127, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 25px rgba(255, 59, 127, 0.4);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Mode Selector */
+    .mode-label {
+      font-size: 0.85rem;
+      color: var(--text-dim);
+      margin-bottom: 10px;
+      letter-spacing: 1px;
+    }
+
+    .mode-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 8px;
+    }
+
+    .mode-btn {
+      padding: 10px 12px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px;
+      color: var(--text-dim);
+      font-family: 'Noto Sans HK', sans-serif;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: center;
+    }
+
+    .mode-btn:hover {
+      background: rgba(255, 59, 127, 0.1);
+      border-color: rgba(255, 59, 127, 0.3);
+      color: var(--text);
+    }
+
+    .mode-btn.active {
+      background: linear-gradient(135deg, rgba(255, 59, 127, 0.2), rgba(123, 47, 247, 0.2));
+      border-color: var(--primary);
+      color: white;
+      box-shadow: 0 0 15px rgba(255, 59, 127, 0.15);
+    }
+
+    /* Result Area */
+    .result-card {
+      min-height: 120px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .result-card.empty {
+      opacity: 0.5;
+    }
+
+    .result-mode-tag {
+      font-size: 0.75rem;
+      padding: 4px 12px;
+      border-radius: 20px;
+      background: rgba(0, 245, 212, 0.1);
+      border: 1px solid rgba(0, 245, 212, 0.2);
+      color: var(--accent);
+      display: inline-block;
+      margin-bottom: 12px;
+      font-family: 'Orbitron', sans-serif;
+      letter-spacing: 1px;
+    }
+
+    .result-text {
+      font-size: 1.3rem;
+      line-height: 1.6;
+      font-weight: 700;
+      max-width: 100%;
+      word-break: break-word;
+    }
+
+    .result-text.loading {
+      color: var(--accent);
+      animation: pulse 1s ease-in-out infinite;
+    }
+
+    .result-text .cursor {
+      display: inline-block;
+      width: 3px;
+      height: 1.3em;
+      background: var(--accent);
+      margin-left: 2px;
+      animation: blink 0.7s steps(1) infinite;
+      vertical-align: text-bottom;
+    }
+
+    @keyframes blink {
+      50% { opacity: 0; }
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .placeholder-text {
+      color: var(--text-dim);
+      font-size: 0.95rem;
+      opacity: 0.6;
+    }
+
+    .copy-btn {
+      margin-top: 16px;
+      padding: 8px 20px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      color: var(--text-dim);
+      font-family: 'Noto Sans HK', sans-serif;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: none;
+    }
+
+    .copy-btn.show {
+      display: inline-block;
+    }
+
+    .copy-btn:hover {
+      background: rgba(255,255,255,0.1);
+      color: var(--text);
+    }
+
+    .copy-btn.copied {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Error */
+    .error {
+      color: var(--primary);
+      font-size: 0.9rem;
+      margin-top: 10px;
+      display: none;
+    }
+
+    .error.show {
+      display: block;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 30px 0;
+      color: var(--text-dim);
+      font-size: 0.8rem;
+      opacity: 0.5;
+    }
+
+    /* Responsive */
+    @media (max-width: 500px) {
+      .container { padding: 12px; }
+      h1 { font-size: 1.8rem; }
+      .input-group { flex-direction: column; }
+      .btn { width: 100%; text-align: center; }
+      .mode-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">// TOXIC_TONGUE //</div>
+      <h1>毒舌回覆生成器</h1>
+      <p class="subtitle">AI 幫你串到應一應 🎯 <span>·</span> 香港地道粵語</p>
+    </header>
+
+    <!-- Mode Selector -->
+    <div class="card">
+      <div class="mode-label">◈ 選擇毒舌模式</div>
+      <div class="mode-grid" id="modeGrid">
+        <button class="mode-btn active" data-mode="savage">🔥 黑面模式</button>
+        <button class="mode-btn" data-mode="passive_aggressive">😏 扮關心模式</button>
+        <button class="mode-btn" data-mode="boomer">👴 老豆教仔模式</button>
+        <button class="mode-btn" data-mode="corporate">💼 官方標準回覆</button>
+        <button class="mode-btn" data-mode="simp">🥺 毒向左搬模式</button>
+      </div>
+    </div>
+
+    <!-- Input -->
+    <div class="card">
+      <div class="input-group">
+        <input type="text" id="topicInput" placeholder="輸入話題... e.g. 返工好攰" maxlength="100" autofocus>
+        <button class="btn btn-primary" id="generateBtn">生成！</button>
+      </div>
+      <div class="error" id="error"></div>
+    </div>
+
+    <!-- Result -->
+    <div class="card result-card empty" id="resultCard">
+      <div class="result-mode-tag" id="resultMode">🔥 黑面模式</div>
+      <div class="result-text" id="resultText">
+        <span class="placeholder-text">↑ 輸入話題，生成毒舌回覆</span>
+      </div>
+      <button class="copy-btn" id="copyBtn">📋 複製回覆</button>
+    </div>
+
+    <footer>
+      毒舌回覆生成器 v1.0 · Powered by OpenAI · 笑笑好，唔好認真 🖤
+    </footer>
+  </div>
+
+  <script>
+    let currentMode = 'savage';
+
+    // Mode selector
+    document.querySelectorAll('.mode-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentMode = btn.dataset.mode;
+        updateResultModeTag();
+      });
+    });
+
+    function updateResultModeTag() {
+      const names = {
+        savage: '🔥 黑面模式',
+        passive_aggressive: '😏 扮關心模式',
+        boomer: '👴 老豆教仔模式',
+        corporate: '💼 官方標準回覆',
+        simp: '🥺 毒向左搬模式'
+      };
+      document.getElementById('resultMode').textContent = names[currentMode] || '🔥 黑面模式';
+    }
+
+    // Generate
+    const generateBtn = document.getElementById('generateBtn');
+    const topicInput = document.getElementById('topicInput');
+    const resultText = document.getElementById('resultText');
+    const resultCard = document.getElementById('resultCard');
+    const error = document.getElementById('error');
+    const copyBtn = document.getElementById('copyBtn');
+
+    generateBtn.addEventListener('click', generate);
+    topicInput.addEventListener('keydown', e => { if (e.key === 'Enter') generate(); });
+
+    async function generate() {
+      const topic = topicInput.value.trim();
+      if (!topic) {
+        showError('輸入話題先啦喂 😤');
+        topicInput.focus();
+        return;
+      }
+
+      hideError();
+      generateBtn.disabled = true;
+      generateBtn.textContent = '生成中...';
+      resultCard.classList.remove('empty');
+      resultText.innerHTML = 'AI 諗緊點串你...<span class="cursor"></span>';
+      resultText.className = 'result-text loading';
+      copyBtn.classList.remove('show');
+
+      try {
+        const endpoint = 'generate-demo';
+        const res = await fetch(`/api/${endpoint}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ topic, mode: currentMode })
+        });
+
+        const data = await res.json();
+
+        if (data.error) {
+          showError(data.error);
+          resultText.innerHTML = '<span class="placeholder-text">生成失敗 😅</span>';
+          resultText.className = 'result-text';
+          return;
+        }
+
+        // Typewriter effect
+        resultText.className = 'result-text';
+        resultText.innerHTML = '';
+        const reply = data.reply;
+        let i = 0;
+        const typeInterval = setInterval(() => {
+          if (i < reply.length) {
+            resultText.innerHTML = reply.substring(0, i + 1) + '<span class="cursor"></span>';
+            i++;
+          } else {
+            clearInterval(typeInterval);
+            resultText.innerHTML = reply;
+            copyBtn.classList.add('show');
+          }
+        }, 20);
+
+        updateResultModeTag();
+
+      } catch (err) {
+        showError('連線出錯，試多次啦 😢');
+        resultText.innerHTML = '<span class="placeholder-text">網絡錯誤</span>';
+        resultText.className = 'result-text';
+      } finally {
+        generateBtn.disabled = false;
+        generateBtn.textContent = '生成！';
+      }
+    }
+
+    // Copy
+    copyBtn.addEventListener('click', () => {
+      const text = resultText.textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        copyBtn.textContent = '✅ 已複製！';
+        copyBtn.classList.add('copied');
+        setTimeout(() => {
+          copyBtn.textContent = '📋 複製回覆';
+          copyBtn.classList.remove('copied');
+        }, 2000);
+      });
+    });
+
+    function showError(msg) {
+      error.textContent = msg;
+      error.classList.add('show');
+    }
+
+    function hideError() {
+      error.classList.remove('show');
+    }
+  </script>
+</body>
+</html>
