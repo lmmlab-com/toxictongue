@@ -8,10 +8,26 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// ── Environment Variable Debug Logging ──
+console.log('═══════════════════════════════════════════');
+console.log('💀 毒舌回覆生成器 - Startup Diagnostics');
+console.log('═══════════════════════════════════════════');
+console.log(`PORT           = "${process.env.PORT || '(not set)'}"`);
+console.log(`OPENAI_API_KEY = "${process.env.OPENAI_API_KEY ? '***' + process.env.OPENAI_API_KEY.slice(-4) : '(not set)'}"`);
+console.log(`               → length: ${process.env.OPENAI_API_KEY ? process.env.OPENAI_API_KEY.length : 0}`);
+console.log(`OPENAI_BASE_URL = "${process.env.OPENAI_BASE_URL || '(not set — will use default)'}"`);
+console.log(`OPENAI_MODEL    = "${process.env.OPENAI_MODEL || '(not set — will use default)'}"`);
+console.log('───────────────────────────────────────────');
+
 // ── OpenAI Configuration from Environment Variables ──
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || '';
 const OPENAI_BASE_URL = process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1';
 const OPENAI_MODEL = process.env.OPENAI_MODEL || 'gpt-3.5-turbo';
+
+// Log the final resolved values
+console.log('→ Resolved configuration:');
+console.log(`  model:    "${OPENAI_MODEL}"`);
+console.log(`  baseURL:  "${OPENAI_BASE_URL}"`);
 
 // Initialize OpenAI client only if API key is provided
 let openai = null;
@@ -20,10 +36,11 @@ if (OPENAI_API_KEY) {
     apiKey: OPENAI_API_KEY,
     baseURL: OPENAI_BASE_URL,
   });
-  console.log(`✓ OpenAI configured (model: ${OPENAI_MODEL}, baseURL: ${OPENAI_BASE_URL})`);
+  console.log('✅ OpenAI client initialized — LIVE AI MODE');
 } else {
-  console.log('⚠ No OPENAI_API_KEY set — using demo mode (mock replies)');
+  console.log('⚠️  No API key — operating in DEMO MODE (mock replies)');
 }
+console.log('═══════════════════════════════════════════\n');
 
 const MODES = {
   savage: {
